@@ -80,6 +80,26 @@ def temp_monthly():
     temps = list(np.ravel(results))
     return jsonify(temps=temps)
 
-# Test the code 
-# Instructions say http://localhost:5000/ is the url flask run should produce
-# I get the same url as before http://127.0.0.1:5000/ 
+# Create the Statistics Route
+@app.route("/api/v1.0/temp/<start>")
+@app.route("/api/v1.0/temp/<start>/<end>")
+
+# Create the stats() function:
+def stats(start=None, end=None):
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+
+    if not end:
+        results = session.query(*sel).\
+            filter(Measurement.date >= start).all()
+        temps = list(np.ravel(results))
+        return jsonify(temps)
+
+    results = session.query(*sel).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+    temps = list(np.ravel(results))
+    return jsonify(temps)
+
+# Test the code with a specific date:
+# To find the minimum, maximum, and average temperatures for June 2017
+# Add /api/v1.0/temp/2017-06-01/2017-06-30 to the end of the URL - works
